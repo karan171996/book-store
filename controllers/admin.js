@@ -13,12 +13,14 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  Product.create({
-    title: title,
-    imageUrl: imageUrl,
-    price: price,
-    description: description,
-  })
+  req.user
+    .createProduct({
+      // createProduct because our Model is product (this method is develop when association happening with user and Product so sequelize created it automatically)
+      title: title,
+      imageUrl: imageUrl,
+      price: price,
+      description: description,
+    })
     .then((result) => {
       console.log("exports.postAddProduct -> result", result);
       res.redirect("/admin/products");
@@ -32,8 +34,11 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect("/");
   }
   const prodId = req.params.productId;
-  Product.findByPk(prodId)
-    .then((product) => {
+  req.user
+    .getProducts({ where: { id: prodId } }) // same thing line 18
+    // Product.findByPk(prodId)
+    .then((products) => {
+      const product = products[0];
       if (!product) {
         return res.redirect("/");
       }
@@ -59,7 +64,7 @@ exports.postEditProduct = (req, res, next) => {
       product.imageUrl = updatedImageUrl;
       product.description = updatedDesc;
       product.price = updatedPrice;
-      return product.save();
+      return product.save(); // For update the item database (CURD) it's U
     })
     .then((result) => {
       console.log("UPDATED product");
@@ -69,7 +74,9 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.findAll()
+  req.user
+    .getProducts() // same thing line 18
+    // Product.findAll()
     .then((products) => {
       res.render("admin/products", {
         prods: products,
@@ -84,7 +91,7 @@ exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findByPk(prodId)
     .then((product) => {
-      return product.destroy();
+      return product.destroy(); //It will delete the item (CURD) its D
     })
     .then((result) => {
       console.log("PRODUCT deleted successfully");

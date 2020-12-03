@@ -1,6 +1,7 @@
 const Product = require("../models/product");
 const Cart = require("../models/cart");
 
+// This controller is for the  getting all items in Product Tab
 exports.getProducts = (req, res, next) => {
   Product.findAll()
     .then((products) => {
@@ -15,6 +16,7 @@ exports.getProducts = (req, res, next) => {
     });
 };
 
+// This controller is for single product in the Product Tab
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
   Product.findByPk(prodId)
@@ -29,6 +31,7 @@ exports.getProduct = (req, res, next) => {
     .catch((error) => console.log(error));
 };
 
+// This. controller is for the showing all items under the Shop Tab
 exports.getIndex = (req, res, next) => {
   Product.findAll()
     .then((products) => {
@@ -45,7 +48,7 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
   Cart.getCart((cart) => {
-    Product.fetchAll((products) => {
+    Product.findAll((products) => {
       const cartProducts = [];
       for (product of products) {
         const cartProductData = cart.products.find(
