@@ -45,7 +45,7 @@ Cart.belongsTo(User); // cart belongs to user (it is inverse of user has one car
 
 // Many to Many Relation Ship
 Cart.belongsToMany(Product, { through: CartItem }); // one cart can hold multiple product
-Product.belongsToMany(Cart, { through: CartItem }); // single product canbe a part of different Products
+Product.belongsToMany(Cart, { through: CartItem }); // single product can be a part of different Products
 
 sequelize
   // .sync({ force: true })
@@ -61,6 +61,9 @@ sequelize
   })
   .then((user) => {
     // console.log("user", user);
+    user.createCart();
+  })
+  .then((cart) => {
     app.listen(3000);
   })
   .catch((error) => {
