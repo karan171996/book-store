@@ -1,6 +1,5 @@
 const Product = require("../models/product");
 const Cart = require("../models/cart");
-
 // This controller is for the  getting all items in Product Tab
 exports.getProducts = (req, res, next) => {
   Product.findAll()
@@ -105,9 +104,49 @@ exports.postCart = (req, res, next) => {
     })
     .catch((err) => console.log(err));
 };
-
+exports.postOrder = (req, res, next) => {
+  req.user
+    .getCart()
+    .then((cart) => {
+      return cart.getProducts();
+    })
+    .then((products) => {
+      return req.user
+        .createOrder()
+        .then((order) => {
+          return order.addProduct(
+            products.map((product) => {
+              product.orderItem = { quantity: product.cartItem.quantity };
+              return product;
+            })
+          );
+        })
+        .catch((err) => console.log(err));
+    })
+    .then((result) => {
+      res.redirect("/orders");
+    })
+    .catch((err) => console.log("err", err));
+};
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
+  req.user
+    .getCart()
+    .then((cart) => {
+      return cart.getProducts({ where: { id: prodId } });
+    })
+    .then((products) => {
+      const product = products[0];
+      //destroying product but not in products table
+      //deleting in between cartitem table of the product and the user
+      return product.cartItem.destroy();
+    })
+    .then((result) => {
+      res.redirect("/cart");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
   Product.findByPk(prodId, (product) => {
     Cart.deleteProduct(prodId, product.price);
     res.redirect("/cart");

@@ -17,6 +17,8 @@ const Product = require("./models/product");
 const User = require("./models/user");
 const Cart = require("./models/cart");
 const CartItem = require("./models/cart-Item");
+const Order = require("./models/order");
+const OrderItem = require("./models/order-item");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -33,10 +35,10 @@ app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 
 app.use(errorController.get404);
+
 //One to Many
 // onDelete means when user gets deleted then its product also deleted
 Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" }); // user created this product (Important) (Product is beleonging to user becuse , user created it)
-
 User.hasMany(Product); //one user has many products
 
 // One to One Relatin Ship
@@ -46,6 +48,13 @@ Cart.belongsTo(User); // cart belongs to user (it is inverse of user has one car
 // Many to Many Relation Ship
 Cart.belongsToMany(Product, { through: CartItem }); // one cart can hold multiple product
 Product.belongsToMany(Cart, { through: CartItem }); // single product can be a part of different Products
+
+//One to Many Relation Ship
+Order.belongsTo(User); //single order belongs to same user
+User.hasMany(Order); // user have many orders
+
+//May to many reationship
+Order.belongsToMany(Product, { through: OrderItem });
 
 sequelize
   // .sync({ force: true })
