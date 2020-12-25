@@ -1,19 +1,19 @@
 const path = require("path");
-
+const dotenv = require("dotenv");
 const express = require("express");
 const bodyParser = require("body-parser");
 
 const errorController = require("./controllers/error");
 
+dotenv.config();
 const app = express();
-const monogoConnect = require("./util/database");
+const mongoConnect = require("./util/database").mongoConnect;
 
 app.set("view engine", "ejs");
 app.set("views", "views");
 
-// const adminRoutes = require("./routes/admin");
-// const shopRoutes = require("./routes/shop");
-
+const shopRoutes = require("./routes/shop");
+const adminRoutes = require("./routes/admin");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -24,12 +24,12 @@ app.use((req, res, next) => {
   //     next();
   //   })
   //   .catch((err) => console.log(err));
+  next();
 });
-// app.use("/admin", adminRoutes);
-// app.use(shopRoutes);
+app.use("/admin", adminRoutes);
+app.use(shopRoutes);
 
 app.use(errorController.get404);
-monogoConnect((client) => {
-  console.log(client);
+mongoConnect(() => {
   app.listen(3000);
 });

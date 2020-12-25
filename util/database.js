@@ -1,16 +1,32 @@
 const mongodb = require("mongodb");
 const MongoClient = mongodb.MongoClient;
+let _db;
 
-const mongoClient = (callback) => {
+const mongoConnect = (callback) => {
+  const uri = process.env.DATABASE_URL;
   MongoClient.connect(
-    "mongodb+srv://Karan17:IsvA60d83FRRAolG@cluster0.nnioy.mongodb.net/test?retryWrites=true&w=majority"
+    uri,
+    {
+      useUnifiedTopology: true,
+    } //Here shop will be the database were it will connect, if it is not there it will connect when we write data in it
   )
     .then((client) => {
       console.log("Connected!!!");
-      callback(client);
+      _db = client.db();
+      callback();
     })
     .catch((err) => {
       console.log(err);
+      throw err;
     });
 };
-module.exports = mongoClient;
+
+const getDb = () => {
+  if (_db) {
+    return _db;
+  } else {
+    throw "No database specified!";
+  }
+};
+exports.mongoConnect = mongoConnect;
+exports.getDb = getDb;
