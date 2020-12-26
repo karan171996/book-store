@@ -18,7 +18,7 @@ exports.getProducts = (req, res, next) => {
 // This controller is for single product in the Product Tab
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
-  Product.findByPk(prodId)
+  Product.findById(prodId)
     .then((product) => {
       console.log(product);
       res.render("shop/product-detail", {

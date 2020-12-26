@@ -23,74 +23,69 @@ exports.postAddProduct = (req, res, next) => {
     .catch((error) => console.log("exports.postAddProduct -> error", error));
 };
 
-// exports.getEditProduct = (req, res, next) => {
-//   const editMode = req.query.edit;
-//   if (!editMode) {
-//     return res.redirect("/");
-//   }
-//   const prodId = req.params.productId;
-//   req.user
-//     .getProducts({ where: { id: prodId } }) // same thing line 18
-//     // Product.findByPk(prodId)
-//     .then((products) => {
-//       const product = products[0];
-//       if (!product) {
-//         return res.redirect("/");
-//       }
-//       res.render("admin/edit-product", {
-//         pageTitle: "Edit Product",
-//         path: "/admin/edit-product",
-//         editing: editMode,
-//         product: product,
-//       });
-//     })
-//     .catch((error) => console.log("error", error));
-// };
+exports.getEditProduct = (req, res, next) => {
+  const editMode = req.query.edit;
+  if (!editMode) {
+    return res.redirect("/");
+  }
+  const prodId = req.params.productId;
+  Product.findById(prodId)
+    // Product.findByPk(prodId)
+    .then((product) => {
+      if (!product) {
+        return res.redirect("/");
+      }
+      res.render("admin/edit-product", {
+        pageTitle: "Edit Product",
+        path: "/admin/edit-product",
+        editing: editMode,
+        product: product,
+      });
+    })
+    .catch((error) => console.log("error", error));
+};
 
-// exports.postEditProduct = (req, res, next) => {
-//   const prodId = req.body.productId;
-//   const updatedTitle = req.body.title;
-//   const updatedPrice = req.body.price;
-//   const updatedImageUrl = req.body.imageUrl;
-//   const updatedDesc = req.body.description;
-//   Product.findByPk(prodId)
-//     .then((product) => {
-//       product.title = updatedTitle;
-//       product.imageUrl = updatedImageUrl;
-//       product.description = updatedDesc;
-//       product.price = updatedPrice;
-//       return product.save(); // For update the item database (CURD) it's U
-//     })
-//     .then((result) => {
-//       console.log("UPDATED product");
-//       res.redirect("/admin/products");
-//     })
-//     .catch((error) => console.log("error", error));
-// };
+exports.postEditProduct = (req, res, next) => {
+  const prodId = req.body.productId;
+  const updatedTitle = req.body.title;
+  const updatedPrice = req.body.price;
+  const updatedImageUrl = req.body.imageUrl;
+  const updatedDesc = req.body.description;
 
-// exports.getProducts = (req, res, next) => {
-//   req.user
-//     .getProducts() // same thing line 18
-//     // Product.findAll()
-//     .then((products) => {
-//       res.render("admin/products", {
-//         prods: products,
-//         pageTitle: "Admin Products",
-//         path: "/admin/products",
-//       });
-//     })
-//     .catch((error) => console.log("err", error));
-// };
+  const product = new Product(
+    updatedTitle,
+    updatedPrice,
+    updatedImageUrl,
+    updatedDesc,
+    prodId
+  );
+  product
+    .save()
+    .then((result) => {
+      console.log("UPDATED product");
+      res.redirect("/admin/products");
+    })
+    .catch((error) => console.log("error", error));
+};
 
-// exports.postDeleteProduct = (req, res, next) => {
-//   const prodId = req.body.productId;
-//   Product.findByPk(prodId)
-//     .then((product) => {
-//       return product.destroy(); //It will delete the item (CURD) its D
-//     })
-//     .then((result) => {
-//       console.log("PRODUCT deleted successfully");
-//       res.redirect("/admin/products");
-//     })
-//     .catch((error) => console.log("error", error));
-// };
+exports.getProducts = (req, res, next) => {
+  Product.fetchAll()
+    .then((products) => {
+      res.render("admin/products", {
+        prods: products,
+        pageTitle: "Admin Products",
+        path: "/admin/products",
+      });
+    })
+    .catch((error) => console.log("err", error));
+};
+
+exports.postDeleteProduct = (req, res, next) => {
+  const prodId = req.body.productId;
+  Product.deletedById(prodId)
+    .then(() => {
+      console.log("PRODUCT deleted successfully");
+      res.redirect("/admin/products");
+    })
+    .catch((error) => console.log("error", error));
+};
