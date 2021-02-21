@@ -1,15 +1,46 @@
-const Sequelize = require("sequelize").Sequelize;
-const sequelize = require("../util/database");
+const mongodb = require("mongodb");
+const getDb = require("../util/database").getDb;
 
-const User = sequelize.define("user", {
-  id: {
-    type: Sequelize.INTEGER,
-    autoIncrement: true,
-    allowNull: false,
-    primaryKey: true,
-  },
-  name: Sequelize.STRING,
-  email: Sequelize.STRING,
-});
+const ObjectId = mongodb.ObjectID;
+
+class User {
+  constructor(username, email, cart, id) {
+    this.name = username;
+    this.email = email;
+    this.cart = cart;
+    this._id = id;
+  }
+
+  addToCart(product) {
+    const updatedCart = {
+      items: [{ productId: new ObjectId(product._id), quantity: 1 }],
+    };
+    const db = getDb();
+    return db
+      .collection("users")
+      .updateOne(
+        { _id: new ObjectId(this._id) },
+        { $set: { cart: updatedCart } }
+      );
+  }
+
+  save() {
+    const db = getDb();
+    return db.collection("users").insertOne(this);
+  }
+
+  static findById(userId) {
+    const db = getDb();
+    return db
+      .collection("users")
+      .findOne({ _id: new ObjectId(userId) })
+      .then((user) => {
+        return user;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+}
 
 module.exports = User;
