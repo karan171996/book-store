@@ -2,7 +2,7 @@ const Product = require("../models/product");
 // const Cart = require("../models/cart");
 // This controller is for the  getting all items in Product Tab
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) => {
       res.render("shop/product-list", {
         prods: products,
@@ -32,7 +32,7 @@ exports.getProduct = (req, res, next) => {
 
 // This. controller is for the showing all items under the Shop Tab
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) => {
       res.render("shop/index", {
         prods: products,

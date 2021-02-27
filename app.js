@@ -7,7 +7,8 @@ const errorController = require("./controllers/error");
 
 dotenv.config();
 const app = express();
-const mongoConnect = require("./util/database").mongoConnect;
+const mongoose = require("mongoose");
+
 const User = require("./models/user");
 
 app.set("view engine", "ejs");
@@ -19,9 +20,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use((req, res, next) => {
-  User.findById("60315092edce93da49e1ac6e")
+  User.findById("603a9d6922bd17e10ffe1d82")
     .then((user) => {
-      req.user = new User(user.name, user.email, user.cart, user._id); //sequelize object
+      // req.user = new User(user.name, user.email, user.cart, user._id); //sequelize object
+      req.user = user;
       next();
     })
     .catch((err) => console.log(err));
@@ -30,6 +32,20 @@ app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 
 app.use(errorController.get404);
-mongoConnect(() => {
-  app.listen(3000);
-});
+
+mongoose
+  .connect(process.env.DATABASE_URL)
+  .then((result) => {
+    User.findOne().then((user) => {
+      if (!user) {
+        const user = new User({
+          name: "Karan Singh",
+          email: "krnsngh38@gmail.com",
+          cart: { items: [] },
+        });
+        user.save();
+      }
+    });
+    app.listen(3000);
+  })
+  .catch((error) => console.log(error));
